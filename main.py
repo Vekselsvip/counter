@@ -1,6 +1,9 @@
 from telebot import types
 import telebot
+from flask import Flask, request
 
+app = Flask(__name__)
+TOKEN = '5416512263:AAFvQ7A8kR1AyqQN15IO4BWkOgqYaEzLBXA'
 bot = telebot.TeleBot('5416512263:AAFvQ7A8kR1AyqQN15IO4BWkOgqYaEzLBXA')
 my_dict = {'AT-AT': 1.40, 'AT-BE': 1.40, 'AT-CH': 1.75, 'AT-CZ': 1.40, 'AT-DE': 1.40, 'AT-DK': 1.75, 'AT-ES': 1.46,
            'AT-FR': 1.75, 'AT-GB': 1.75, 'AT-HU': 1.64, 'AT-IT': 1.28, 'AT-NL': 1.40, 'AT-PL': 1.02, 'AT-RO': 1.99,
@@ -104,5 +107,18 @@ def my_calc(message):
     bot.send_message(message.chat.id, f'ну где-то {res}')
 
 
+@app.route('/' + TOKEN, methods=['POST'])
+def get_message():
+    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    return "Python Telegram Bot 25-11-2022", 200
+
+
+@app.route('/')
+def main():
+    bot.remove_webhook()
+    bot.set_webhook(url='https://first-my-bot.herokuapp.com/' + TOKEN)
+    return "Python Telegram Bot", 200
+
+
 if __name__ == '__main__':
-    bot.polling(none_stop=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
